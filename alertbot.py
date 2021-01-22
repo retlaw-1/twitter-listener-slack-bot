@@ -1,5 +1,6 @@
-from slackclient import SlackClient
+#from slackclient import SlackClient
 from datetime import datetime
+from slack import WebClient
 import pathlib
 import time
 import os
@@ -14,7 +15,7 @@ class Alertbot:
         self.SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
         self.SLACK_BOT_NAME = os.environ.get('SLACK_BOT_NAME')
         
-        self.sc = SlackClient(self.SLACK_BOT_TOKEN)
+        self.sc = WebClient(self.SLACK_BOT_TOKEN)
         
         self.SLACK_BOT_ID = self.get_bot_id()
         self.users = self.get_users()
@@ -106,19 +107,20 @@ View the full URL here: \n
     
     def get_bot_channels(self):
 
-        channels = self.sc.api_call(
-            'channels.list',
-            exclude_archived=1
-        )
-        
+        #channels = self.sc.api_call('users.conversations')
+        channels = self.sc.api_call(api_method='users.conversations',
+                json={'exclude_archived':1}
+                )
+
+
         channels_list = channels['channels']
 
         memberships = []
         
         for channel in channels_list:
-            if self.SLACK_BOT_ID in channel['members']:
-                memberships.append(channel['id'])
-                
+            #if self.SLACK_BOT_ID in channel['members']:
+            #print(channel['id'])
+            memberships.append(channel['id'])
         return memberships
     
     def parse_matches(self,content):
@@ -195,12 +197,9 @@ View the full URL here: \n
         timestamp = self.get_tweet_timestamp()
         
         for channel in channels:
-            self.sc.api_call(
-                "chat.postMessage",
-                channel=channel,
-                text=message,
-                as_user=True
-            )
+            #self.sc.api_call("chat.postMessage", channel=channel,text=message,as_user=True)
+            #channel=channel
+            self.sc.api_call(api_method='chat.postMessage',json={'channel': channel, 'text': message, 'as_user': 'True'})
             
         print('Success! Message posted to {} channel(s) on {} at {}.'.format(
             len(channels),
