@@ -1,4 +1,3 @@
-#from slackclient import SlackClient
 from datetime import datetime
 from slack import WebClient
 import pathlib
